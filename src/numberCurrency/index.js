@@ -130,7 +130,6 @@ class CurrencyInput extends Component {
             selectionEnd = Math.min(node.selectionEnd, this.theInput.value.length - this.props.suffix.length);
             selectionStart = Math.min(node.selectionStart, selectionEnd);
         }
-        console.log(`componentDidMount==selectionStart:${selectionStart}, selectionEnd: ${selectionEnd}`)
         this.setSelectionRange(node, selectionStart, selectionEnd);
     }
 
@@ -301,8 +300,8 @@ CurrencyInput.defaultProps = {
     precision: '2',
     inputType: 'text',
     allowNegative: false,
-    prefix: '',
-    suffix: '',
+    prefix: '$',
+    suffix: 'D',
     selectAllOnFocus: false
 };
 

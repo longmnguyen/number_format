@@ -3,7 +3,6 @@ import NumberInput from './NumberInput'
 
 import NumberPlugin from './NumberPlugin';
 import CurrencyInput from './numberCurrency'
-import NumberInput2 from './NumberInput2'
 const MainContext = React.createContext(null);
 
 const initialState = {count: 0};
@@ -58,7 +57,11 @@ function Body() {
     const valuenumber = event.target.valuenumber.value
     setconfig({valuenumber,precision,thousandSeparator, decimalSeparator, round})
   }
-
+  const onValueChange = ({floatValue}) => {
+    let update = {...config}
+    update.valuenumber = floatValue
+    setconfig(update)
+  }
 
   return (
     <div style={styles.container}>
@@ -98,12 +101,9 @@ function Body() {
         borderRadius: '5px',
         fontSize: '1.5em'
     }}
-        onChange={e => {setResult(e);dispatch({ type: 'increment',payload:e})}}
+        onValueChange={onValueChange}
+        onChange={e => {dispatch({ type: 'increment',payload:e})}}
         value={config.valuenumber}
-        roundDecimal={config.round} 
-        precision={config.precision} 
-        thousandSeparator={config.thousandSeparator} 
-        decimalSeparator={config.decimalSeparator} 
         />
         
         <span>numper format plugin</span>
@@ -123,6 +123,7 @@ function Body() {
         value={config.valuenumber}
         onChangeEvent={(event, maskedvalue, floatvalue) => dispatch({ type: 'increment',payload:floatvalue})}/>
       </div>
+      <input />
     </div>
   );
 }
