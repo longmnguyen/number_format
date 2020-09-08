@@ -3,6 +3,20 @@ import NumberInput from './NumberInput'
 
 import NumberPlugin from './NumberPlugin';
 import CurrencyInput from './numberCurrency'
+import AutoNumeric from './numericformat'
+
+
+const Test = () => {
+  
+  const inpput = React.useRef()
+  React.useEffect(() => {
+    if (inpput.current) {
+      const element = new AutoNumeric(inpput.current);
+    }
+   
+  }, [])
+  return (<input ref={inpput}/>)
+}
 const MainContext = React.createContext(null);
 
 const initialState = {count: 0};
@@ -65,6 +79,7 @@ function Body() {
 
   return (
     <div style={styles.container}>
+    
       <div style={styles.body}>
 
      
@@ -93,6 +108,7 @@ function Body() {
         </div>
         <button type="submit" style={{width: 50, alignSelf: 'center'}}>Save</button>
       </form>
+      <Test />
         <NumberInput 
         style={{
         height: '50px',
@@ -113,15 +129,13 @@ function Body() {
         precision={config.precision}
         value={config.valuenumber}
         roundDecimal={config.round} 
-        onValueChange={data => dispatch({ type: 'increment',payload:data.floatValue})}
         />
           <span>currency plugin</span>
         <CurrencyInput  
        thousandSeparator={config.thousandSeparator} 
         decimalSeparator={config.decimalSeparator}  
         precision={config.precision}
-        value={config.valuenumber}
-        onChangeEvent={(event, maskedvalue, floatvalue) => dispatch({ type: 'increment',payload:floatvalue})}/>
+        value={config.valuenumber}/>
       </div>
       <input />
     </div>
