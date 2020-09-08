@@ -7,9 +7,8 @@ const NumberInput = React.memo((props) => {
     thousandSeparator = ",",
     decimalSeparator = ".",
     roundDecimal = false,
-    prefix = '',
-    suffix = '',
-    allowNegative = true,
+    prefix = '$',
+    suffix = 'G',
     onValueChange,
     onChange,
     onBlur,
@@ -31,13 +30,15 @@ const NumberInput = React.memo((props) => {
     inputRef.current.setSelectionRange(dataValue.caretPos, dataValue.caretPos)
   });
 
-  const formatNumberString = (stringValue = '', selectionStart, selectionEnd) => {
+  const formatNumberString = (stringValue = '') => {
     if (!stringValue || stringValue.length == 0) return {formattedValue: '', floatValue : null}
     const negativeCount =  (stringValue.match(/-/g) || []).length
     const hasDecimalSeparator = stringValue.indexOf(decimalSeparator) !== -1
     const parts = stringValue.replace(new RegExp('\\' + decimalSeparator), '&&').split('&&');
     let beforeDecimal = ((parts[0] || '').match(/\d/g) || []).join('').trim()
     let afterDecimal =  ((parts[1] || '').match(/\d/g) || []).join('').trim()
+    const prefixRegex = new RegExp('\\' + prefix)
+    if (!beforeDecimal && !afterDecimal && (prefix && !prefixRegex.test(stringValue))) return {formattedValue: '', floatValue : null}
     //handle beforeDecimal
     let numberIndex = beforeDecimal.search(/[1-9]/)
     beforeDecimal = beforeDecimal.split('')
@@ -46,9 +47,11 @@ const NumberInput = React.memo((props) => {
         beforeDecimal.splice(x, 0, thousandSeparator);
       }
     }
+    if (prefix.length > 0) beforeDecimal.unshift(prefix)
     if (negativeCount === 1) beforeDecimal.unshift('-')
     //handle afterDecimal
     if (hasDecimalSeparator) afterDecimal = decimalSeparator + afterDecimal
+    if (suffix.length > 0) afterDecimal = afterDecimal + suffix
      return {
       formattedValue: beforeDecimal.join('').replace(/^0+\,/) + afterDecimal,
       floatValue: Number((beforeDecimal + afterDecimal).replace(new RegExp('\\' + thousandSeparator, 'g'),'').replace(new RegExp('\\' + decimalSeparator),'.'))
@@ -57,13 +60,28 @@ const NumberInput = React.memo((props) => {
 
   const correctNumberString = (stringValue) => {
     if (stringValue === undefined || stringValue === null || stringValue.length === 0) return ''
+    if (prefix.length > 0) {
+      stringValue = stringValue.replace(new RegExp('\\' + prefix), '')
+    }
+    if (suffix.length > 0) {
+      stringValue = stringValue.replace(new RegExp('\\' + suffix), '')
+    }
+    const hasNegation = /-/g.test(stringValue)
+    if (hasNegation) {
+      stringValue = stringValue.replace(/-/, '')
+    }
     const parts = stringValue.replace(new RegExp('\\' + decimalSeparator), '&&').split('&&');
     let beforeDecimal = (parts[0].replace(/^0+/,'') || '0')
     let afterDecimal =  ((parts[1] || '').match(/\d/g) || []).join('').trim()
+
     if (precision !== undefined) {
       const roundValue = Number('0.' + afterDecimal).toFixed(precision).split('.')
       afterDecimal = roundValue[1] || ''
     } 
+    const isZero = /^0+$/.test(beforeDecimal) && (afterDecimal.length === 0 || /^0+$/.test(afterDecimal))
+    if (prefix.length > 0) beforeDecimal = prefix + beforeDecimal
+    if (hasNegation && !isZero) beforeDecimal = '-'+ beforeDecimal
+    if (suffix.length > 0) afterDecimal = afterDecimal + suffix
     return beforeDecimal + decimalSeparator + afterDecimal
   }
 
@@ -91,7 +109,7 @@ const NumberInput = React.memo((props) => {
       }
     }
     const hasNegation = formattedValue[0] === '-';
-    return clamp(start + adjustment, (hasNegation ? 2 : 1), formattedValue.length);
+    return clamp(start + adjustment, (hasNegation ? 2 : 1) + prefix.length, formattedValue.length - suffix.length);
   }
 
   const handleKeyDown = (event) => {
@@ -105,7 +123,7 @@ const NumberInput = React.memo((props) => {
   const handleChange = (event) => {
     const element = event.target
     const {value, selectionStart, selectionEnd} = element
-    const {formattedValue, floatValue} = formatNumberString(value, selectionStart, selectionEnd)
+    const {formattedValue, floatValue} = formatNumberString(value)
     const caretPos = getCaretPosition(dataValue.formattedValue,value,formattedValue,  {start: selectionStart, end:selectionEnd})
     setDataValue(prev => ({...prev, caretPos}))
     if (dataValue.formattedValue !== formattedValue) {
