@@ -72,9 +72,11 @@ function Body() {
     setconfig({valuenumber,precision,thousandSeparator, decimalSeparator, round})
   }
   const onValueChange = ({floatValue}) => {
+    console.log(`===floatValue`,floatValue)
     let update = {...config}
     update.valuenumber = floatValue
     setconfig(update)
+    dispatch({type:'increment', payload: floatValue})
   }
 
   return (
@@ -117,9 +119,8 @@ function Body() {
         borderRadius: '5px',
         fontSize: '1.5em'
     }}
+    value={config.valuenumber}
         onValueChange={onValueChange}
-        onChange={e => {dispatch({ type: 'increment',payload:e})}}
-        value={config.valuenumber}
         />
         
         <span>numper format plugin</span>
